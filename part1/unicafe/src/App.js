@@ -1,31 +1,33 @@
-import React, {useState} from "react"
+import { useState } from 'react'
+import Button from './Button'
+import Statistic from './Statistic'
 
 const App = () => {
-  const [left, setLeft] = useState(0)
-  const [right, setRight] = useState(0)
 
-  const [allClicks, setAll] = useState([])
+  const [good, setGood] = useState(0)
+  const [neutral, setNeutral] = useState(0)
+  const [bad, setBad] = useState(0)
 
-
-  const handleLeftClick = () => {
-    setAll(allClicks.concat('L'))
-    setLeft(left + 1)
+  const handleGood = () => {
+    setGood(good + 1);
   }
 
+  const handleBad = () => {
+    setBad(bad + 1);
+  }
 
-  const handleRightClick = () => {
-    setAll(allClicks.concat('R'))
-    setRight(right + 1)
+  const handleNeutral = () => {
+    setNeutral(neutral + 1);
   }
 
   return (
     <div>
-      {left}
-      <button onClick={handleLeftClick}>left</button>
-      <button onClick={handleRightClick}>right</button>
-      {right}
-
-      <p>{allClicks.join(' ')}</p>
+      <h1>give feedback</h1>
+      <Button handleSubmit={handleGood} text={"good"} />
+      <Button handleSubmit={handleNeutral} text={"neutral"} />
+      <Button handleSubmit={handleBad} text={"bad"} />
+      <h1>statistics</h1>
+<Statistic good={good} bad={bad} neutral={neutral}/>
     </div>
   )
 }
