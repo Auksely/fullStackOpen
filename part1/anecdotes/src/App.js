@@ -47,6 +47,8 @@ return indexMost;
       {anecdotes[findMostPoints()]}
     </div>
   )
-}
+};
+
+
 
 export default App
