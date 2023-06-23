@@ -1,8 +1,9 @@
 import React from "react";
 
-const Input=({type, value, onChange, name } )=>{
+const Input=({type, value, onChange, name, label } )=>{
     return(
         <div>
+        <label>{label}</label>
             <input
             type={type}
             value={value}
