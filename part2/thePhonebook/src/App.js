@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-// import axios from 'axios'
 
+import Notification from './components/Notification'
 import Input from './components/Input'
 import Button from './components/Button'
 import List from './components/List'
@@ -9,12 +9,10 @@ import { getAll, create, deletePerson, update } from './service/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
-  const [newPerson, setNewPerson] = useState(
-    { name: '', number: '' }
-  )
+  const [newPerson, setNewPerson] = useState({ name: '', number: '' })
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState(false);
-  // const [filteredList, setFilteredList]=useState([]);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     getAll()
@@ -23,31 +21,42 @@ const App = () => {
       })
   }, [])
 
-  console.log('persons1', persons)
-
   const onChange = (e) => {
     const { name, value } = e.target;
     setNewPerson({ ...newPerson, [name]: value });
   }
 
+  const existingPerson = persons.find(person => person.name === newPerson.name);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const existingPerson = persons.find(person => person.name === newPerson.name);
 
     if (existingPerson) {
       const existingPersonId = existingPerson.id;
       const changedNumber = { ...existingPerson, number: newPerson.number }
       if (window.confirm(`${existingPerson.name} is already added to phonebook, replace old number with the new one?`)) {
-        console.log('changedNumber', changedNumber)
 
         update(existingPersonId, changedNumber)
           .then(changedNumber => {
             setPersons(persons.map(person => person.id !== existingPersonId ? person : changedNumber))
           })
+          .catch(error => {
+            alert(
+              `${existingPerson.name} was already deleted from server`
+            )
+            setPersons(persons.filter(person => person.id !== existingPersonId))
+          })
+
+        setNotification(
+          `${existingPerson.name} number was changed to ${changedNumber.number}`
+        )
+        setTimeout(() => {
+          setNotification(null)
+        }, 5000)
 
       }
     }
+
     else {
       const addPerson = {
         name: newPerson.name,
@@ -56,9 +65,19 @@ const App = () => {
       create(addPerson)
         .then(returnedPerson =>
           setPersons(persons.concat(returnedPerson)))
-      setNewPerson({ name: '', number: '' })
+
+      setNotification(
+        `${newPerson.name} is added to the phonebook`
+      )
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
+
     }
+    setNewPerson({ name: '', number: '' })
+
   }
+
 
   const handleDelete = id => {
     const findPerson = persons.find(person => person.id === id);
@@ -71,17 +90,21 @@ const App = () => {
               setPersons(initialNotes)
             })
         })
-        .catch(error => {
-          console.log(error)
-        })
     }
   }
+
 
   const onSearch = (e) => {
     setSearch(e.target.value);
     setFilter(true);
   }
   const filteredList = persons.filter(person => person.name && person.name.includes(search));
+
+
+    getAll()
+      .then(initialNotes => {
+        setPersons(initialNotes)
+      })
 
   return (
     <div>
@@ -92,6 +115,7 @@ const App = () => {
         <Input label="Number" type='text' name='number' value={newPerson.number} onChange={onChange} />
         <Button type="submit" text={"Add"} />
       </form>
+      <Notification message={notification} />
       <h2>Numbers</h2>
       <List list={filter ? filteredList : persons} handleDelete={handleDelete} />
     </div>
